@@ -57,15 +57,15 @@ const defaultData: SiteData = {
     { id: 'f5', question: 'Do you handle design and installation?', answer: 'Yes. Large-format printing, night installations, weekly photo proofs, and maintenance included. We also offer design adaptation.', category: 'Services' },
   ],
   team: [
-    { id: 'tm1', name: 'Kelechi Nwosu', role: 'Founder & CEO', bio: 'Ex-JCDecaux, 12 years OOH. Built hive strategy for 300+ campaigns.', avatar: 'KN' },
-    { id: 'tm2', name: 'Zainab Yusuf', role: 'Head of Inventory', bio: 'Owns 250+ site relationships. Negotiates premium visibility.', avatar: 'ZY' },
-    { id: 'tm3', name: 'David Obi', role: 'Creative Ops', bio: 'Leads print & install crews. Night owl, perfect finish.', avatar: 'DO' },
+    { id: 'tm1', name: 'Gbenga Phillips', role: 'Founder & CEO', bio: 'Advert Consultant, 12 years OOH. Built hive strategy for 300+ campaigns.', avatar: 'KN' },
+    { id: 'tm2', name: 'Iyiola Adu', role: 'Head of Inventory', bio: 'Owns 250+ site relationships. Negotiates premium visibility.', avatar: 'ZY' },
+    { id: 'tm3', name: 'Ranti Ijora', role: 'Creative Ops', bio: 'Leads print & install crews. Night owl, perfect finish.', avatar: 'DO' },
   ],
   aboutImages: [
     { id: 'about1', src: '', alt: 'BeeLight outdoor advertising operations', caption: 'Planning visibility with precision.' },
     { id: 'about2', src: '', alt: 'BeeLight advertising installation team', caption: 'Campaign execution from print to proof.' },
   ],
-  settings: { accent: '#FFC300', adminEmail: 'admin@beelightadvertising.com', whatsapp: '2348032684135', logoUrl: '', siteName: 'BeeLightAdvertising' },
+  settings: { accent: '#FFC300', adminEmail: 'admin@beelightadvertising.com', whatsapp: '2348056615526', logoUrl: '', siteName: 'BeeLightAdvertising' },
   address: '2A Babatunde Street, off Ogunlana Drive, Surulere, Lagos',
   hours: 'Mon - Sat: 9am - 6pm WAT'
 };
@@ -391,6 +391,60 @@ export default function App() {
   const [adminAuthed, setAdminAuthed] = useState(false);
   const [adminPass, setAdminPass] = useState('');
   const [adminTab, setAdminTab] = useState<'hero'|'metrics'|'services'|'inventory'|'testimonials'|'faq'|'team'|'about'|'settings'|'docs'>('hero');
+  const [draggingInventoryId, setDraggingInventoryId] = useState<string | null>(null);
+
+  const prepareInventoryImage = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      reject(new Error('Use a JPG, PNG or WebP image.'));
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      reject(new Error('Image is too large. Maximum source size is 8 MB.'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('The image could not be read.'));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error('The selected file is not a valid image.'));
+      image.onload = () => {
+        const maxDimension = 1400;
+        const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          reject(new Error('Your browser could not prepare this image.'));
+          return;
+        }
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/webp', 0.82));
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const handleInventoryImageUpload = async (index: number, file?: File) => {
+    if (!file) return;
+    try {
+      const image = await prepareInventoryImage(file);
+      const inventory = [...data.inventory];
+      inventory[index] = { ...inventory[index], image };
+      const nextData = { ...data, inventory };
+      localStorage.setItem('beelight_data', JSON.stringify(nextData));
+      setData(nextData);
+      showToast(`Inventory image updated for ${inventory[index].title} ✓`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'The image could not be uploaded.');
+    } finally {
+      setDraggingInventoryId(null);
+    }
+  };
 
   const handleAboutImageUpload = (index: number, file?: File) => {
     if (!file) return;
@@ -891,6 +945,7 @@ export default function App() {
                     {adminTab==='inventory' && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center"><h3 className="font-bold text-[18px]">Inventory</h3><button onClick={()=>setData({...data, inventory:[{id:'b'+Date.now(), title:'New Billboard', location:'Lekki, Lagos', city:'Lagos', size:'12m x 4m', type:'Static', price:'₦1M / month', availability:'Available', image:'https://images.unsplash.com/photo-1569511166187-97eb6e387e19?q=80&w=800&auto=format&fit=crop', details:'New premium site', featured:false}, ...data.inventory]})} className="h-8 px-3 rounded-full bg-[#FFC300] text-black font-bold text-[12px]">+ Add</button></div>
+                        <div className="rounded-xl border border-[#FFC300]/20 bg-[#FFC300]/10 p-3 text-[11px] leading-relaxed text-white/65"><b className="text-[#FFC300]">Browser upload:</b> drag-and-drop images are compressed and saved on this browser. Use permanent files in <code className="bg-black/30 px-1 rounded">public/images</code> or cloud storage when every visitor must see Admin uploads.</div>
                         <div className="grid gap-3">
                           {data.inventory.map((it,idx)=>(
                             <div key={it.id} className="rounded-xl bg-white/[0.03] border border-white/10 p-4">
@@ -903,7 +958,31 @@ export default function App() {
                                 <input value={it.price} onChange={e=>{ const c=[...data.inventory]; c[idx].price=e.target.value; setData({...data, inventory:c}); }} className="rounded-lg bg-white/5 border border-white/10 p-2 text-[13px]" placeholder="price"/>
                                 <select value={it.availability} onChange={e=>{ const c=[...data.inventory] as any; c[idx].availability=e.target.value; setData({...data, inventory:c}); }} className="rounded-lg bg-[#1a1a1f] border border-white/10 p-2 text-[13px]"><option>Available</option><option>Booked</option><option>Limited</option></select>
                                 <label className="flex items-center gap-2 text-[12px]"><input type="checkbox" checked={it.featured} onChange={e=>{ const c=[...data.inventory]; c[idx].featured=e.target.checked; setData({...data, inventory:c}); }}/> Featured</label>
-                                <input value={it.image} onChange={e=>{ const c=[...data.inventory]; c[idx].image=e.target.value; setData({...data, inventory:c}); }} className="md:col-span-2 rounded-lg bg-white/5 border border-white/10 p-2 text-[12px]" placeholder="image URL"/>
+                                <div className="md:col-span-2 grid sm:grid-cols-[180px_1fr] gap-3 rounded-xl bg-black/20 border border-white/10 p-3">
+                                  <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                                    {it.image ? (
+                                      <img src={it.image} alt={`${it.title} preview`} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <div className="w-full h-full grid place-items-center text-[11px] text-white/35">No image</div>
+                                    )}
+                                  </div>
+                                  <div className="min-w-0 space-y-2">
+                                    <label
+                                      onDragEnter={e=>{ e.preventDefault(); setDraggingInventoryId(it.id); }}
+                                      onDragOver={e=>{ e.preventDefault(); e.dataTransfer.dropEffect='copy'; setDraggingInventoryId(it.id); }}
+                                      onDragLeave={e=>{ if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDraggingInventoryId(null); }}
+                                      onDrop={e=>{ e.preventDefault(); void handleInventoryImageUpload(idx, e.dataTransfer.files?.[0]); }}
+                                      className={`min-h-[92px] rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition px-4 ${draggingInventoryId===it.id?'border-[#FFC300] bg-[#FFC300]/15':'border-white/20 bg-white/[0.03] hover:border-[#FFC300]/60 hover:bg-white/[0.06]'}`}
+                                    >
+                                      <span className="text-[22px]">⇧</span>
+                                      <span className="mt-1 text-[12px] font-bold">Drop an image here or click to browse</span>
+                                      <span className="mt-1 text-[10px] text-white/40">JPG, PNG or WebP • up to 8 MB • optimized automatically</span>
+                                      <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e=>{ void handleInventoryImageUpload(idx, e.target.files?.[0]); e.currentTarget.value=''; }} />
+                                    </label>
+                                    <input value={it.image.startsWith('data:')?'':it.image} onChange={e=>{ const c=[...data.inventory]; c[idx]={...c[idx], image:e.target.value}; setData({...data, inventory:c}); }} className="w-full rounded-lg bg-white/5 border border-white/10 p-2 text-[12px]" placeholder={it.image.startsWith('data:')?'Local image uploaded — paste URL to replace':'Or paste an image URL'}/>
+                                    {it.image && <button type="button" onClick={()=>{ const c=[...data.inventory]; c[idx]={...c[idx], image:''}; setData({...data, inventory:c}); showToast(`Image removed from ${it.title}`); }} className="text-[11px] px-3 py-1.5 rounded-full bg-red-500/20 text-red-300">Remove image</button>}
+                                  </div>
+                                </div>
                                 <textarea value={it.details} onChange={e=>{ const c=[...data.inventory]; c[idx].details=e.target.value; setData({...data, inventory:c}); }} className="md:col-span-2 rounded-lg bg-white/5 border border-white/10 p-2 text-[12px]" rows={2} placeholder="details"/>
                               </div>
                               <div className="mt-2 flex justify-end"><button onClick={()=>setData({...data, inventory:data.inventory.filter(x=>x.id!==it.id)})} className="text-[11px] px-3 py-1 rounded-full bg-red-500/20 text-red-300">Delete</button></div>
