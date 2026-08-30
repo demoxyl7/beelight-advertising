@@ -864,7 +864,9 @@ export default function App() {
               <div className="max-w-[420px] mx-auto mt-10 rounded-[28px] glass p-8">
                 <Logo variant="dark"/>
                 <h2 className="display text-[22px] font-bold mt-6">Admin access</h2>
-                <p className="text-[13px] text-white/50 mt-2">Default password: <code className="bg-white/10 px-1.5 py-0.5 rounded">beelight2025</code> — change via env later.</p>
+                <p className="text-[13px] text-white/50 mt-2">
+                    Enter your administrator password to continue.
+                </p>
                 <input type="password" value={adminPass} onChange={e=>setAdminPass(e.target.value)} placeholder="Enter admin password" className="mt-6 w-full h-12 rounded-2xl bg-white/10 border border-white/10 px-4 text-[14px] outline-none"/>
                 <button onClick={()=>{ if(adminPass==='beelight2025'){ setAdminAuthed(true); } else { showToast('Wrong password'); } }} className="mt-4 w-full h-12 rounded-full bg-[#FFC300] text-black font-bold">Unlock Hive</button>
                 <button onClick={()=>navigate('/')} className="mt-3 w-full h-11 rounded-full glass font-bold text-[13px]">Back to site</button>
@@ -1072,7 +1074,10 @@ export default function App() {
                       <div className="prose prose-invert max-w-none text-[13.5px] leading-relaxed">
                         <h3 className="font-bold text-[18px]">README — BeeLightAdvertising Deployment</h3>
                         <div className="mt-4 space-y-4 text-white/70">
-                          <div><b className="text-white">1. Update content via Admin:</b> Login at /admin (beelight2025) → edit tabs → auto-saved to localStorage key `beelight_data`. For production Vercel KV, replace localStorage writes with fetch('/api/data').</div>
+                          <div>
+                              <b className="text-white">1. Update content via Admin:</b>{' '}
+  Login at /admin with your administrator password → edit tabs → auto-saved to localStorage key `beelight_data`.
+                        </div>
                           <div><b className="text-white">2. Change admin email:</b> Admin → Settings → adminEmail, or set env var `VITE_ADMIN_EMAIL` in Vercel dashboard. API route should read `process.env.ADMIN_EMAIL || data.settings.adminEmail`.</div>
                           <div><b className="text-white">3. Update WhatsApp:</b> Admin → Settings → whatsapp number. All wa.me links use `data.settings.whatsapp`. Search codebase for wa.me if hardcoded.</div>
                           <div><b className="text-white">4. Deploy to Vercel:</b> <code className="bg-white/10 px-2 py-1 rounded block mt-2 whitespace-pre-wrap">{`npm i\nvercel --prod\n# set env vars in Vercel:\nVITE_ADMIN_EMAIL=admin@beelightadvertising.com\nADMIN_WHATSAPP=2348032684135`}</code></div>
