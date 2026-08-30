@@ -62,9 +62,19 @@ const defaultData: SiteData = {
     { id: 'tm3', name: 'Ranti Ijora', role: 'Creative Ops', bio: 'Leads print & install crews. Night owl, perfect finish.', avatar: 'DO' },
   ],
   aboutImages: [
-    { id: 'about1', src: '', alt: 'BeeLight outdoor advertising operations', caption: 'Planning visibility with precision.' },
-    { id: 'about2', src: '', alt: 'BeeLight advertising installation team', caption: 'Campaign execution from print to proof.' },
-  ],
+  {
+    id: 'about1',
+    src: '/images/about-bill-1.png',
+    alt: 'BeeLight outdoor advertising operations',
+    caption: 'Planning visibility with precision.'
+  },
+  {
+    id: 'about2',
+    src: '/images/about-bill-2.png',
+    alt: 'BeeLight advertising installation team',
+    caption: 'Campaign execution from print to proof.'
+  },
+],
   settings: { accent: '#FFC300', adminEmail: 'admin@beelightadvertising.com', whatsapp: '2348056615526', logoUrl: '', siteName: 'BeeLightAdvertising' },
   address: '2A Babatunde Street, off Ogunlana Drive, Surulere, Lagos',
   hours: 'Mon - Sat: 9am - 6pm WAT'
@@ -261,7 +271,13 @@ export default function App() {
           ...defaultData,
           ...parsed,
           address: parsed.address === 'The Hive, 12A Admiralty Way, Lekki Phase 1, Lagos' ? defaultData.address : (parsed.address || defaultData.address),
-          aboutImages: parsed.aboutImages || defaultData.aboutImages,
+          aboutImages: defaultData.aboutImages.map((fallbackImage, index) => {
+  const savedImage = parsed.aboutImages?.[index];
+
+  return savedImage?.src
+    ? savedImage
+    : fallbackImage;
+}),
         });
       }catch{}
     }
