@@ -260,7 +260,7 @@ export default function App() {
 
   // Load from localStorage
   useEffect(()=>{
-    const stored = localStorage.getItem('beelight_data');
+    const stored = localStorage.getItem('beelight_data_v2');
     if(stored){
       try{
         const parsed = JSON.parse(stored);
@@ -289,7 +289,7 @@ export default function App() {
 
   // Persist
   useEffect(()=>{
-    try { localStorage.setItem('beelight_data', JSON.stringify(data)); }
+    try { localStorage.setItem('beelight_data_v2', JSON.stringify(data)); }
     catch { console.warn('BeeLight data could not be saved because browser storage is full.'); }
   }, [data]);
 
@@ -449,7 +449,7 @@ export default function App() {
       const inventory = [...data.inventory];
       inventory[index] = { ...inventory[index], image };
       const nextData = { ...data, inventory };
-      localStorage.setItem('beelight_data', JSON.stringify(nextData));
+      localStorage.setItem('beelight_data_v2', JSON.stringify(nextData));
       setData(nextData);
       showToast(`Inventory image updated for ${inventory[index].title} ✓`);
     } catch (error) {
@@ -475,7 +475,7 @@ export default function App() {
       aboutImages[index] = { ...aboutImages[index], src: String(reader.result) };
       const nextData = { ...data, aboutImages };
       try {
-        localStorage.setItem('beelight_data', JSON.stringify(nextData));
+        localStorage.setItem('beelight_data_v2', JSON.stringify(nextData));
         setData(nextData);
         showToast(`About image ${index + 1} updated ✓`);
       } catch {
@@ -1089,7 +1089,7 @@ export default function App() {
                         <div className="mt-4 space-y-4 text-white/70">
                           <div>
                               <b className="text-white">1. Update content via Admin:</b>{' '}
-  Login at /admin with your administrator password → edit tabs → auto-saved to localStorage key `beelight_data`.
+  Login at /admin with your administrator password → edit tabs → auto-saved to localStorage key `beelight_data_v2`.
                         </div>
                           <div><b className="text-white">2. Change admin email:</b> Admin → Settings → adminEmail, or set env var `VITE_ADMIN_EMAIL` in Vercel dashboard. API route should read `process.env.ADMIN_EMAIL || data.settings.adminEmail`.</div>
                           <div><b className="text-white">3. Update WhatsApp:</b> Admin → Settings → whatsapp number. All wa.me links use `data.settings.whatsapp`. Search codebase for wa.me if hardcoded.</div>
