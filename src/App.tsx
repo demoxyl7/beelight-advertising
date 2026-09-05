@@ -85,15 +85,12 @@ function Logo({ variant='dark', small=false }: { variant?: 'dark'|'light', small
   const light = variant === 'light';
   return (
     <div role="img" aria-label="BeeLight Advertising" className={`shrink-0 flex items-center gap-2 ${small ? 'scale-90 origin-left' : ''}`}>
-      <svg aria-hidden="true" viewBox="0 0 64 52" className="w-10 h-8 md:w-12 md:h-10 overflow-visible">
-        <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M29 15c-4-9-13-12-19-7-5 4-2 12 5 13 5 1 10-1 14-6Z" stroke={light ? '#fff' : '#fff'} strokeWidth="2.5"/>
-          <path d="M35 15c4-9 13-12 19-7 5 4 2 12-5 13-5 1-10-1-14-6Z" fill="#FFC300" stroke="#FFC300" strokeWidth="2.5"/>
-          <path d="M32 13c-8 0-12 6-10 14 2 10 8 18 10 18s8-8 10-18c2-8-2-14-10-14Z" fill="#FFC300" stroke="#FFC300" strokeWidth="2"/>
-          <path d="M23 24h18M25 31h14M28 38h8" stroke="#0A0A0F" strokeWidth="3"/>
-          <path d="M29 11c-1-5-4-7-7-8M35 11c1-5 4-7 7-8" stroke={light ? '#fff' : '#fff'} strokeWidth="2.2"/>
-        </g>
-      </svg>
+      <img
+  src="/images/bee-logo-gold.jpg"
+  alt=""
+  aria-hidden="true"
+  className="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0"
+/>
       <span className="display font-extrabold tracking-[-0.04em] leading-none text-[21px] md:text-[26px] text-white">BEE<span className="text-[#FFC300]">LIGHT</span></span>
     </div>
   );
